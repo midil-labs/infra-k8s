@@ -2,9 +2,9 @@ expose:
   type: ingress
   ingress:
     hosts:
-      core: harbor.midil.io        # replace with your domain
-      notary: notary.midil.io      # optional
-    className: traefik             # k3s default ingress controller
+      core: harbor.midil.io
+      notary: notary.midil.io
+    className: traefik
     annotations:
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
     tls:
@@ -17,7 +17,7 @@ persistence:
   enabled: true
   persistentVolumeClaim:
     registry:
-      size: 100Gi   # adjust as needed
+      size: 100Gi
     chartmuseum:
       size: 5Gi
     jobservice:
@@ -29,7 +29,7 @@ persistence:
     trivy:
       size: 5Gi
 
-harborAdminPassword: "devops@midil.io"   # change this
+harborAdminPassword: "devops@midil.io"
 
 database:
   type: internal
@@ -37,10 +37,10 @@ redis:
   type: internal
 
 chartmuseum:
-  enabled: false   # not needed unless you want Helm chart storage
+  enabled: false
 notary:
-  enabled: false   # disable unless you need image signing
+  enabled: false
 
 trivy:
-  enabled: true    # vulnerability scanning
+  enabled: true
 
