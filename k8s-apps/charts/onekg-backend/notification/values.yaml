@@ -1,0 +1,116 @@
+replicaCount: 3   # At least 3 replicas for HA
+
+image:
+  repository: ghcr.io/midil-labs/onekg-backend-notification
+  tag: "0.1.0"   # Use Git SHA or semantic version, never "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets:
+    - name: ghcr-secret
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  # Traefik-specific IngressRoute
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: onekg-backend-notification@kubernetescrd
+  hosts:
+    - host: notification.onekg.midil.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: notification-tls
+      hosts:
+        - notification.onekg.midil.io
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 75
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 15
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8000
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+
+startupProbe:
+  httpGet:
+    path: /startup
+    port: 8000
+  failureThreshold: 30
+  periodSeconds: 10
+
+nodeSelector: {}
+tolerations: []
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - onekg-backend-notification
+        topologyKey: "kubernetes.io/hostname"
+
+# Centralized logging sidecar (optional: e.g., Fluent Bit)
+logging:
+  enabled: false
+
+# Environment variables (use secrets in prod)
+envFrom:
+  - secretRef:
+      name: notification-env-secret
