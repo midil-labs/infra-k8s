@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sealed-secrets
+  name: namespaces
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/mk-armah/infra-k8s.git'
-    path: 'infra/sealed-secrets'
+    path: 'k8s-apps/namespaces'
     targetRevision: HEAD
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: sealed-secrets
+    namespace: default
   syncPolicy:
     automated:
       prune: true
