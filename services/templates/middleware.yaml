@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "onekg-service.labels" . | nindent 4 }}
 spec:
-    stripPrefix:
+  stripPrefix:
     prefixes:
       - /apis/v1/{{ .Values.serviceName }}
 
