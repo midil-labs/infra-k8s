@@ -1,20 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: notification
+  name: namespaces
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/midil-labs/infra-k8s.git'
-    path: 'k8s-apps/charts/onekg-backend/notification'
+    path: 'k8s-apps/namespaces'
     targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: onekg-backend
+    namespace: default
   syncPolicy:
     automated:
       prune: true
