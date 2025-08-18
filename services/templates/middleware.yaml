@@ -9,7 +9,7 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - {{ .Values.ingress.path }}
+      - /apis/v1/{{ .Values.serviceName }}
 
 ---
 {{- end }}
