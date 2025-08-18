@@ -29,7 +29,7 @@ persistence:
     trivy:
       size: 5Gi
 
-harborAdminPassword: "devops@midil.io"
+harborAdminPassword: ""
 
 database:
   type: internal
