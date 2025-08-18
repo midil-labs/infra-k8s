@@ -96,7 +96,7 @@ services:
   notification:
     enabled: true
     namespace: onekg-backend
-    path: /v1/notification
+    path: /apis/v1/notification
     version: "0.1.1-dev0"
     image:
       repository: ghcr.io/midil-labs/onekg-backend-notification

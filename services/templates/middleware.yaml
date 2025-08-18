@@ -7,9 +7,9 @@ metadata:
   labels:
     {{- include "onekg-service.labels" . | nindent 4 }}
 spec:
-  stripPrefix:
+    stripPrefix:
     prefixes:
-      - /v1/{{ .Values.serviceName }}
+      - /apis/v1/{{ .Values.serviceName }}
 
 ---
 {{- end }}
@@ -44,8 +44,7 @@ spec:
       {{- end }}
       {{- else }}
       # Default origins if not configured
-      - "https://app.onekg.midil.io"
-      - "https://admin.onekg.midil.io"
+      - "https://onekg.midil.io"
       {{- end }}
     accessControlAllowHeaders:
       {{- if .Values.global.cors.allowedHeaders }}
