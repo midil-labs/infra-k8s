@@ -1,0 +1,94 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ $.Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $serviceName }}
+    app.kubernetes.io/part-of: onekg-platform
+    app.kubernetes.io/managed-by: app-of-apps
+    {{- include "onekg-platform.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: {{ $.Values.argocd.project }}
+  source:
+    repoURL: {{ $.Values.argocd.repoURL }}
+    path: services
+    targetRevision: {{ $.Values.argocd.targetRevision }}
+    helm:
+      valueFiles:
+        - "../service-configs/{{ $serviceName }}/values.yaml"
+      parameters:
+        # Service identification
+        - name: "serviceName"
+          value: {{ $serviceName | quote }}
+        
+        # Image configuration
+        - name: "image.repository"
+          value: {{ $service.image.repository | quote }}
+        - name: "image.tag"
+          value: {{ $service.version | quote }}
+        
+        # Gateway and ingress
+        - name: "global.gateway.domain"
+          value: {{ $.Values.global.gateway.domain | quote }}
+        - name: "global.gateway.tls.secretName"
+          value: {{ $.Values.global.gateway.tls.secretName | quote }}
+        - name: "ingress.path"
+          value: {{ $service.path | quote }}
+        
+        # CORS configuration
+        - name: "global.cors.environment"
+          value: {{ $.Values.global.cors.environment | quote }}
+        - name: "cors.enabled"
+          value: {{ $service.cors.enabled | quote }}
+        
+        # Monitoring
+        {{- if $service.monitoring }}
+        - name: "monitoring.enabled"
+          value: {{ $service.monitoring.enabled | default $.Values.global.monitoring.prometheus.enabled | quote }}
+        - name: "monitoring.port"
+          value: {{ $service.monitoring.port | default $.Values.global.monitoring.prometheus.port | quote }}
+        {{- end }}
+        
+        # Resources (if overridden)
+        {{- if $service.resources }}
+        {{- if $service.resources.requests }}
+        - name: "resources.requests.cpu"
+          value: {{ $service.resources.requests.cpu | default $.Values.global.resources.requests.cpu | quote }}
+        - name: "resources.requests.memory"
+          value: {{ $service.resources.requests.memory | default $.Values.global.resources.requests.memory | quote }}
+        {{- end }}
+        {{- if $service.resources.limits }}
+        - name: "resources.limits.cpu"
+          value: {{ $service.resources.limits.cpu | default $.Values.global.resources.limits.cpu | quote }}
+        - name: "resources.limits.memory"
+          value: {{ $service.resources.limits.memory | default $.Values.global.resources.limits.memory | quote }}
+        {{- end }}
+        {{- end }}
+        
+        # Replica count (if overridden)
+        {{- if $service.replicas }}
+        - name: "replicaCount"
+          value: {{ $service.replicas | quote }}
+        {{- end }}
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ $service.namespace }}
+  
+  syncPolicy:
+    {{- toYaml $.Values.argocd.syncPolicy | nindent 4 }}
+  
+  # Health check for the application
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+{{- end }}
+{{- end }}

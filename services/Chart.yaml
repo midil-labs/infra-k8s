@@ -1,0 +1,14 @@
+apiVersion: v2
+name: onekg-service
+description: Generic OneKG Microservice Template
+type: application
+version: 1.0.0
+appVersion: "1.0"
+keywords:
+  - onekg
+  - microservice
+  - template
+home: https://github.com/midil-labs/infra-k8s
+maintainers:
+  - name: Midil Labs
+    email: devops@midil.io

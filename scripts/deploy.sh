@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# GitOps Deployment Script for Midil Labs Infrastructure
-# This script helps deploy and manage the GitOps infrastructure
+# OneKG Infrastructure Deployment Script
+# Manages deployment of the GitOps infrastructure
 
 set -e
 
@@ -11,112 +11,81 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Configuration
-ARGOCD_NAMESPACE="argocd"
-REPO_URL="https://github.com/midil-labs/infra-k8s.git"
-
 # Functions
-log_info() {
-    echo -e "${GREEN}[INFO]${NC} $1"
+deploy_project() {
+    echo -e "${GREEN}🚀 Deploying OneKG platform project...${NC}"
+    
+    echo "1. Deploying project definition..."
+    kubectl apply -f argocd-apps/argocd/infrastructure/onekg-project-app.yaml
+    
+    echo -e "${GREEN}✅ Project definition deployed${NC}"
+    echo -e "${YELLOW}📊 Waiting for project to be created...${NC}"
+    sleep 10
 }
 
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
+deploy_infrastructure() {
+    echo -e "${GREEN}🚀 Deploying infrastructure components...${NC}"
+    
+    echo "1. Deploying namespaces..."
+    kubectl apply -f argocd-apps/argocd/infrastructure/namespaces-app.yaml
+    
+    echo "2. Deploying sealed secrets..."
+    kubectl apply -f argocd-apps/argocd/infrastructure/sealed-secrets-app.yaml
+    
+    echo "3. Deploying platform secrets..."
+    kubectl apply -f argocd-apps/argocd/infrastructure/onekg-secrets-app.yaml
+    
+    echo -e "${GREEN}✅ Infrastructure components deployed${NC}"
 }
 
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-check_prerequisites() {
-    log_info "Checking prerequisites..."
+deploy_platform() {
+    echo -e "${GREEN}🚀 Deploying OneKG platform...${NC}"
     
-    # Check if kubectl is installed
-    if ! command -v kubectl &> /dev/null; then
-        log_error "kubectl is not installed"
-        exit 1
-    fi
+    echo "1. Deploying platform application..."
+    kubectl apply -f argocd-apps/argocd/onekg-platform-app.yaml
     
-    # Check if argocd CLI is installed
-    if ! command -v argocd &> /dev/null; then
-        log_warn "argocd CLI is not installed. Install it for better management."
-    fi
-    
-    # Check if we can connect to the cluster
-    if ! kubectl cluster-info &> /dev/null; then
-        log_error "Cannot connect to Kubernetes cluster"
-        exit 1
-    fi
-    
-    log_info "Prerequisites check passed"
-}
-
-deploy_namespaces() {
-    log_info "Deploying namespaces..."
-    kubectl apply -f k8s-apps/namespaces/
-    log_info "Namespaces deployed successfully"
-}
-
-deploy_argocd_apps() {
-    log_info "Deploying ArgoCD applications..."
-    
-    # Deploy in order of dependencies
-    kubectl apply -f k8s-apps/argocd/namespaces-app.yaml
-    kubectl apply -f k8s-apps/argocd/sealed-secrets-app.yaml
-    kubectl apply -f k8s-apps/argocd/secrets/container-registry/registry-secrets.yaml
-    kubectl apply -f k8s-apps/argocd/secrets/onekg-backend/onekg-backend-secrets.yaml
-    kubectl apply -f k8s-apps/argocd/container-registry/harbor-app.yaml
-    kubectl apply -f k8s-apps/argocd/onekg-backend/notification.yaml
-    
-    log_info "ArgoCD applications deployed successfully"
-}
-
-sync_applications() {
-    if command -v argocd &> /dev/null; then
-        log_info "Syncing ArgoCD applications..."
-        
-        # Wait for applications to be created
-        sleep 10
-        
-        # Sync applications
-        argocd app sync namespaces
-        argocd app sync sealed-secrets
-        argocd app sync registry-secrets
-        argocd app sync harbor
-        argocd app sync notification
-        
-        log_info "Applications synced successfully"
-    else
-        log_warn "argocd CLI not available. Applications will sync automatically."
-    fi
+    echo -e "${GREEN}✅ Platform deployed${NC}"
+    echo -e "${YELLOW}📊 Check status with: argocd app get onekg-platform${NC}"
 }
 
 check_status() {
-    if command -v argocd &> /dev/null; then
-        log_info "Checking application status..."
-        argocd app list
-    else
-        log_info "Checking Kubernetes resources..."
-        kubectl get applications -n argocd
-        kubectl get namespaces | grep -E "(harbor|onekg-backend|sealed-secrets)"
-    fi
+    echo -e "${GREEN}📊 Checking deployment status...${NC}"
+    
+    echo "ArgoCD Applications:"
+    argocd app list
+    
+    echo ""
+    echo "Platform Status:"
+    argocd app get onekg-platform
 }
 
 cleanup() {
-    log_warn "Cleaning up ArgoCD applications..."
-    kubectl delete -f k8s-apps/argocd/ --ignore-not-found=true
-    log_info "Cleanup completed"
+    echo -e "${YELLOW}🧹 Cleaning up deployments...${NC}"
+    
+    echo "1. Removing platform application..."
+    kubectl delete -f argocd-apps/argocd/onekg-platform-app.yaml --ignore-not-found=true
+    
+    echo "2. Removing infrastructure applications..."
+    kubectl delete -f argocd-apps/argocd/infrastructure/ --ignore-not-found=true
+    
+    echo -e "${GREEN}✅ Cleanup completed${NC}"
 }
 
-# Main script
-case "${1:-deploy}" in
+# Main script logic
+case "${1:-help}" in
     "deploy")
-        check_prerequisites
-        deploy_namespaces
-        deploy_argocd_apps
-        sync_applications
-        check_status
-        log_info "Deployment completed successfully!"
+        deploy_project
+        deploy_infrastructure
+        deploy_platform
+        ;;
+    "project")
+        deploy_project
+        ;;
+    "infrastructure")
+        deploy_infrastructure
+        ;;
+    "platform")
+        deploy_platform
         ;;
     "status")
         check_status
@@ -124,18 +93,24 @@ case "${1:-deploy}" in
     "cleanup")
         cleanup
         ;;
-    "help"|"-h"|"--help")
-        echo "Usage: $0 [deploy|status|cleanup|help]"
+    "help"|*)
+        echo "OneKG Infrastructure Deployment Script"
+        echo "====================================="
+        echo ""
+        echo "Usage: $0 [command]"
         echo ""
         echo "Commands:"
-        echo "  deploy   - Deploy the entire GitOps infrastructure (default)"
-        echo "  status   - Check the status of deployed applications"
-        echo "  cleanup  - Remove all ArgoCD applications"
-        echo "  help     - Show this help message"
-        ;;
-    *)
-        log_error "Unknown command: $1"
-        echo "Use '$0 help' for usage information"
-        exit 1
+        echo "  deploy         - Deploy entire infrastructure"
+        echo "  project        - Deploy only project definition"
+        echo "  infrastructure - Deploy only infrastructure components"
+        echo "  platform       - Deploy only platform"
+        echo "  status         - Check deployment status"
+        echo "  cleanup        - Remove all deployments"
+        echo "  help           - Show this help message"
+        echo ""
+        echo "Examples:"
+        echo "  $0 deploy      # Deploy everything"
+        echo "  $0 status      # Check status"
+        echo "  $0 cleanup     # Remove deployments"
         ;;
 esac
