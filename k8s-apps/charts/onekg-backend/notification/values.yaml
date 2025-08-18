@@ -2,7 +2,7 @@ replicaCount: 3   # At least 3 replicas for HA
 
 image:
   repository: ghcr.io/midil-labs/onekg-backend-notification
-  tag: "0.1.0"   # Use Git SHA or semantic version, never "latest"
+  tag: "0.1.0" 
   pullPolicy: IfNotPresent
   pullSecrets:
     - name: ghcr-secret
@@ -14,7 +14,7 @@ serviceAccount:
 
 podAnnotations:
   prometheus.io/scrape: "true"
-  prometheus.io/port: "8000"
+  prometheus.io/port: "8001"
   prometheus.io/path: "/metrics"
 
 podSecurityContext:
@@ -33,7 +33,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8000
+  targetPort: 8001
 
 ingress:
   enabled: true
@@ -70,8 +70,8 @@ autoscaling:
 
 livenessProbe:
   httpGet:
-    path: /health
-    port: 8000
+    path: /api/v1/notifications/health
+    port: 8001
   initialDelaySeconds: 10
   periodSeconds: 15
   timeoutSeconds: 2
@@ -79,8 +79,8 @@ livenessProbe:
 
 readinessProbe:
   httpGet:
-    path: /ready
-    port: 8000
+    path: /api/v1/notifications/ready
+    port: 8001
   initialDelaySeconds: 5
   periodSeconds: 10
   timeoutSeconds: 2
@@ -88,8 +88,8 @@ readinessProbe:
 
 startupProbe:
   httpGet:
-    path: /startup
-    port: 8000
+    path: /api/v1/notifications/health
+    port: 8001
   failureThreshold: 30
   periodSeconds: 10
 
@@ -110,7 +110,6 @@ affinity:
 logging:
   enabled: false
 
-# Environment variables (use secrets in prod)
 envFrom:
   - secretRef:
       name: notification-env-secret
