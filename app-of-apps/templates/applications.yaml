@@ -46,6 +46,30 @@ spec:
           value: {{ $.Values.global.cors.environment | quote }}
         - name: "cors.enabled"
           value: {{ $service.cors.enabled | quote }}
+        - name: "global.cors.allowCredentials"
+          value: {{ $.Values.global.cors.allowCredentials | quote }}
+        - name: "global.cors.maxAge"
+          value: {{ $.Values.global.cors.maxAge | quote }}
+        
+        # CORS allowed methods
+        {{- range $.Values.global.cors.allowedMethods }}
+        - name: "global.cors.allowedMethods"
+          value: {{ . | quote }}
+        {{- end }}
+        
+        # CORS allowed headers
+        {{- range $.Values.global.cors.allowedHeaders }}
+        - name: "global.cors.allowedHeaders"
+          value: {{ . | quote }}
+        {{- end }}
+        
+        # CORS allowed origins for the current environment
+        {{- $environment := $.Values.global.cors.environment | default "production" }}
+        {{- $origins := index $.Values.global.cors.allowedOrigins $environment }}
+        {{- range $origins }}
+        - name: "global.cors.allowedOrigins"
+          value: {{ . | quote }}
+        {{- end }}
         
         # Monitoring
         {{- if $service.monitoring }}
