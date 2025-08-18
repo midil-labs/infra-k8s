@@ -8,8 +8,9 @@ metadata:
     {{- include "onekg-service.labels" . | nindent 4 }}
 spec:
   entryPoints:
-    {{- range .Values.ingress.entryPoints }}
-    - {{ . }}
+    - web
+    {{- if .Values.global.gateway.tls }}
+    - websecure
     {{- end }}
   routes:
     - match: Host(`{{ .Values.global.gateway.domain }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
