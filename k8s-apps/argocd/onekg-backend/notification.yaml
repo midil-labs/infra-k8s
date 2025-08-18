@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/mk-armah/infra-k8s.git'
-    path: 'infra/k8s-apps/charts/onekg-backend/notification'
+    repoURL: 'https://github.com/midil-labs/infra-k8s.git'
+    path: 'k8s-apps/charts/onekg-backend/notification'
     targetRevision: HEAD
     helm:
       valueFiles:

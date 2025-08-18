@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/mk-armah/infra-k8s.git'
+    repoURL: 'https://github.com/midil-labs/infra-k8s.git'
     path: 'k8s-apps/namespaces'
     targetRevision: HEAD
   destination:
