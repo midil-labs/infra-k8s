@@ -32,9 +32,6 @@ deploy_infrastructure() {
     echo "2. Deploying sealed secrets..."
     kubectl apply -f argocd-apps/argocd/infrastructure/sealed-secrets-app.yaml
     
-    echo "3. Deploying platform secrets..."
-    kubectl apply -f argocd-apps/argocd/infrastructure/onekg-secrets-app.yaml
-    
     echo -e "${GREEN}✅ Infrastructure components deployed${NC}"
 }
 
