@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onekg-project
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: onekg-project
+    app.kubernetes.io/part-of: onekg-platform
+    platform.onekg.io/component: infrastructure
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/midil-labs/infra-k8s.git'
+    path: 'argocd-apps/argocd/projects'
+    targetRevision: HEAD
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  # Sync wave to ensure this deploys first (before other applications)
+  info:
+    - name: Description
+      value: "OneKG Platform Project Definition"
+    - name: Purpose
+      value: "Creates the dedicated ArgoCD project for OneKG platform"

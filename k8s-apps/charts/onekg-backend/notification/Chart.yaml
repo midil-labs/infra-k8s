@@ -1,7 +1,0 @@
-apiVersion: v2
-name: notification
-description: A Helm chart for OneKG Backend Notification Service
-type: application
-version: 0.1.0
-appVersion: "1.0"
-icon: https://raw.githubusercontent.com/helm/chart-releaser-action/main/examples/helm-logo.png

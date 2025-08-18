@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: onekg-platform
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: onekg-platform
+    app.kubernetes.io/part-of: onekg-platform
+    platform.onekg.io/component: platform
+spec:
+  project: onekg-platform
+  source:
+    repoURL: https://github.com/midil-labs/infra-k8s.git
+    path: app-of-apps
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  # Sync wave to ensure this deploys first
+  info:
+    - name: Description
+      value: "OneKG Microservices Platform - App of Apps Pattern"
+    - name: Services
+      value: "notification (enabled)"

@@ -1,0 +1,29 @@
+{{- if .Values.ingress.enabled }}
+{{- $fullName := include "onekg-service.fullname" . -}}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "onekg-service.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    {{- range .Values.ingress.entryPoints }}
+    - {{ . }}
+    {{- end }}
+  routes:
+    - match: Host(`{{ .Values.global.gateway.domain }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
+      kind: Rule
+      services:
+        - name: {{ $fullName }}
+          port: {{ .Values.service.port }}
+      middlewares:
+        - name: {{ $fullName }}-strip-prefix
+        {{- if .Values.cors.enabled }}
+        - name: {{ $fullName }}-cors
+        {{- end }}
+  {{- if .Values.global.gateway.tls }}
+  tls:
+    secretName: {{ .Values.global.gateway.tls.secretName }}
+  {{- end }}
+{{- end }}
