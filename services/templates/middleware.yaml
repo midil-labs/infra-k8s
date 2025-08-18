@@ -1,0 +1,45 @@
+{{- if .Values.ingress.enabled }}
+# Strip Prefix Middleware for {{ .Values.serviceName }} service
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "onekg-service.fullname" . }}-strip-prefix
+  labels:
+    {{- include "onekg-service.labels" . | nindent 4 }}
+spec:
+  stripPrefix:
+    prefixes:
+      - {{ .Values.ingress.path }}
+
+---
+{{- end }}
+{{- if .Values.cors.enabled }}
+# CORS Middleware for {{ .Values.serviceName }} service
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "onekg-service.fullname" . }}-cors
+  labels:
+    {{- include "onekg-service.labels" . | nindent 4 }}
+spec:
+  headers:
+    accessControlAllowMethods:
+      {{- range .Values.global.cors.allowedMethods }}
+      - {{ . | quote }}
+      {{- end }}
+    accessControlAllowOriginList:
+      {{- $environment := .Values.global.cors.environment | default "production" }}
+      {{- $origins := index .Values.global.cors.allowedOrigins $environment }}
+      {{- if not $origins }}
+      {{- fail (printf "No CORS origins configured for environment: %s" $environment) }}
+      {{- end }}
+      {{- range $origins }}
+      - {{ . | quote }}
+      {{- end }}
+    accessControlAllowHeaders:
+      {{- range .Values.global.cors.allowedHeaders }}
+      - {{ . | quote }}
+      {{- end }}
+    accessControlAllowCredentials: {{ .Values.global.cors.allowCredentials }}
+    accessControlMaxAge: {{ .Values.global.cors.maxAge }}
+{{- end }}
