@@ -1,148 +1,129 @@
-# GitOps Infrastructure for Midil Labs
+# OneKG Infrastructure - GitOps with ArgoCD
 
-This repository contains the GitOps infrastructure for Midil Labs, managed with ArgoCD using the **App of Apps pattern**.
+This repository contains the GitOps infrastructure for the OneKG platform, using ArgoCD for continuous deployment and Kubernetes for orchestration.
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture
 
-This infrastructure follows GitOps principles using ArgoCD's App of Apps pattern to manage the entire OneKG microservices platform declaratively.
+The infrastructure follows a modern GitOps approach with:
+
+- **ArgoCD**: Declarative GitOps continuous delivery
+- **Kubernetes**: Container orchestration
+- **Traefik**: Ingress controller and API gateway
+- **Helm**: Package management for Kubernetes applications
+- **Sealed Secrets**: Encrypted secrets management
+
+## 📁 Directory Structure
 
 ```
-infra-k8s/
-├── app-of-apps/                     # 🆕 Parent application (manages all microservices)
-│   ├── Chart.yaml
-│   ├── values.yaml                  # Global platform configuration
-│   └── templates/
-│       └── applications.yaml        # Generates child ArgoCD apps
-├── services/                        # 🆕 Shared service templates
-│   ├── Chart.yaml
-│   ├── values.yaml                  # Default service configuration  
-│   └── templates/                   # Common Kubernetes resources
-├── service-configs/                 # 🆕 Individual service configurations
-│   └── notification/
-│       └── values.yaml              # Service-specific overrides
 ├── argocd-apps/                    # 🆕 ArgoCD applications (renamed from k8s-apps)
 │   ├── argocd/                     # ArgoCD application definitions
-│   │   ├── infrastructure/         # Infrastructure applications
-│   │   │   ├── namespaces-app.yaml     # Namespace management
-│   │   │   ├── sealed-secrets-app.yaml # Secret management
-│   │   │   └── onekg-secrets-app.yaml  # Platform secrets
-│   │   └── onekg-platform-app.yaml     # 🎯 App of Apps (manages all microservices)
-│   └── infrastructure/             # 🆕 Reorganized infrastructure components
+│   │   ├── infrastructure/         # Infrastructure components
+│   │   ├── projects/               # ArgoCD project definitions
+│   │   └── onekg-platform-app.yaml # Main App of Apps
+│   └── infrastructure/             # Infrastructure manifests
 │       ├── namespaces/             # Namespace definitions
-│       ├── sealed-secrets/         # Encrypted secrets
-│       └── secrets/                # Platform secrets
-├── sealed-secrets/                  # Legacy location (moved to argocd-apps/infrastructure/)
-└── k3s-registries.yaml              # K3s registry configuration
+│       └── sealed-secrets/         # Encrypted secrets
+├── app-of-apps/                    # App of Apps pattern
+│   ├── templates/                  # Helm templates
+│   └── values.yaml                 # Global configuration
+├── services/                       # Shared service templates
+├── service-configs/                # Service-specific configurations
+└── scripts/                        # Deployment scripts
 ```
 
-## Applications
-
-### OneKG Microservices Platform (App of Apps)
-- **Pattern**: App of Apps with centralized configuration
-- **Services**: notification (only service currently available)
-- **Endpoint**: `api.onekg.midil.io/v1/notification/`
-- **Features**: Shared templates, individual configurations, ready for scaling
-
-### Infrastructure Components
-- **Namespaces**: Automated namespace creation (`onekg-backend`, `sealed-secrets`)
-- **Sealed Secrets**: Encrypted secret management
-- **Container Registry Secret**: GHCR authentication for private images
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Kubernetes cluster (K3s recommended)
-- ArgoCD installed and configured
-- kubeseal for secret encryption
-- Helm 3.x
 
-## 🚀 Deployment
+- Kubernetes cluster with ArgoCD installed
+- `kubectl` configured
+- `helm` (optional, for local testing)
 
-### Quick Start (Development)
-```bash
-# 1. Deploy infrastructure (namespaces, secrets, harbor)
-kubectl apply -f argocd-apps/argocd/infrastructure/
+### Deployment
 
-# 2. Deploy the platform (manages all microservices)
-kubectl apply -f argocd-apps/argocd/onekg-platform-app.yaml
-
-# 3. Check platform status
-argocd app get onekg-platform
-```
-
-### Adding New Services
-```bash
-# 1. Enable service in app-of-apps/values.yaml
-services:
-  payment:
-    enabled: true  # Just change this!
-
-# 2. Create service-configs/payment/values.yaml
-serviceName: payment
-service:
-  targetPort: 8002
-  
-# 3. Commit and push - ArgoCD deploys automatically!
-```
-
-### Secret Management
-Secrets are encrypted using Sealed Secrets. To add new secrets:
-
-1. Create the unencrypted secret YAML
-2. Encrypt using kubeseal:
+1. **Deploy the entire platform**:
    ```bash
-   kubeseal --format=yaml < secret.yaml > sealed-secret.yaml
+   ./scripts/deploy.sh deploy
    ```
-3. Commit the sealed secret to the repository
 
-## Directory Structure
+2. **Check deployment status**:
+   ```bash
+   ./scripts/deploy.sh status
+   ```
 
-### ArgoCD Applications (`argocd-apps/argocd/`)
-- `namespaces-app.yaml` - Manages namespace creation
-- `sealed-secrets-app.yaml` - Manages sealed secrets deployment
-- `onekg-secrets-app.yaml` - Manages platform secrets
-- `onekg-platform-app.yaml` - App of Apps (manages all microservices)
+3. **Clean up**:
+   ```bash
+   ./scripts/deploy.sh cleanup
+   ```
 
-### Infrastructure Components (`argocd-apps/infrastructure/`)
-- `namespaces/` - Namespace definitions
-- `sealed-secrets/` - Encrypted secrets using Sealed Secrets
-- `secrets/` - Platform-specific secrets
+## 📊 Services
 
-### Service Templates (`services/`)
-- Shared Kubernetes resource templates
-- Common configuration patterns
-- Reusable across all microservices
+### Notification Service
 
-### Service Configurations (`service-configs/`)
-- Individual service customizations
-- Service-specific overrides
-- Environment-specific settings
+- **Endpoint**: `onekg.midil.io/apis/v1/notification/`
+- **Health Check**: `onekg.midil.io/apis/v1/notification/health`
+- **Namespace**: `onekg-backend`
+- **Replicas**: 3 (auto-scaling enabled)
+- **Versioning**: Industry standard URL path versioning (`/v1/`)
 
-## Naming Conventions
+### API Versioning
 
-### Applications
-- All applications use `onekg-` prefix: `onekg-platform`, `onekg-namespaces`, etc.
-- Consistent labeling with `app.kubernetes.io/part-of: onekg-platform`
-- Component labels: `platform.onekg.io/component: infrastructure|platform|microservice`
+The platform uses industry standard URL path versioning:
+- **v1**: `onekg.midil.io/apis/v1/notification/`
+- **v2**: `onekg.midil.io/apis/v2/notification/` (future)
+- **FastAPI**: Handles versioning internally with `/v1/` and `/v2/` prefixes
 
-### Services
-- Service names: `notification`, `payment`, etc.
-- Consistent helper functions: `onekg-service.*`, `onekg-platform.*`
-- Standard Kubernetes resource naming
+## 🔧 Configuration
 
-### Directories
-- Clear, descriptive names: `argocd-apps`, `app-of-apps`, `services`
-- Logical organization: `infrastructure/`, `platform/`
-- Consistent structure across components
+### Global Settings
 
-## Contributing
+- **Domain**: `onekg.midil.io`
+- **TLS**: Cloudflare Universal SSL
+- **CORS**: Configured for production origins
+- **Monitoring**: Prometheus metrics enabled
 
-1. Follow the established naming conventions
-2. Use the shared service templates for new services
-3. Add proper labels to all resources
-4. Update documentation for any structural changes
-5. Test changes in staging before production
+### Service Configuration
 
-## Support
+Each service can be configured in `service-configs/<service-name>/values.yaml` with:
+- Resource limits and requests
+- Replica count
+- Monitoring settings
+- CORS configuration
 
-For questions or issues, contact the DevOps team at devops@midil.io
+## 🛠️ Development
+
+### Adding a New Service
+
+1. Create service configuration in `service-configs/<service-name>/`
+2. Add service definition to `app-of-apps/values.yaml`
+3. Deploy with `./scripts/deploy.sh deploy`
+
+### Local Testing
+
+```bash
+# Port-forward to test service locally
+kubectl port-forward service/notification 8080:80 -n onekg-backend
+
+# Test health endpoint
+curl http://localhost:8080/health
+```
+
+## 📈 Monitoring
+
+- **Prometheus**: Metrics collection enabled
+- **Health Checks**: Liveness and readiness probes configured
+- **Logging**: Structured logging with service identification
+
+## 🔒 Security
+
+- **Sealed Secrets**: Encrypted secrets in Git
+- **RBAC**: Role-based access control
+- **Network Policies**: Pod-to-pod communication restrictions
+- **Security Contexts**: Non-root containers
+
+## 📝 Notes
+
+- All changes are managed through GitOps
+- ArgoCD automatically syncs changes from this repository
+- Secrets are encrypted using Sealed Secrets
+- TLS certificates are managed by Cloudflare Universal SSL
