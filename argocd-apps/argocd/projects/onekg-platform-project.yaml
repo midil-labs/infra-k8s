@@ -135,30 +135,6 @@ spec:
       groups:
         - "onekg-readonly"
   
-  # Sync windows for controlled deployments
-  syncWindows:
-    # Production sync window - only during business hours
-    - name: production-sync
-      schedule: "0 9-17 * * 1-5"  # 9 AM to 5 PM, Monday to Friday
-      duration: "8h"
-      applications:
-        - "onekg-platform"
-        - "onekg-namespaces"
-        - "onekg-sealed-secrets"
-      timeZone: "UTC"
-      manualSync: true
-      automaticSync: false
-    
-    # Development sync window - anytime
-    - name: development-sync
-      schedule: "0 0 * * *"  # Always open
-      duration: "24h"
-      applications:
-        - "onekg-*"
-      timeZone: "UTC"
-      manualSync: true
-      automaticSync: true
-  
   # Orphaned resource monitoring
   orphanedResources:
     warn: true
