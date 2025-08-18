@@ -1,37 +1,35 @@
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
-terraform.tfvars
-
 # Kubernetes
-kubeconfig.yaml
 *.kubeconfig
+*.pem
+*.key
+*.crt
+*.p12
 
-# Environment variables
+# Helm
+charts/*/charts/
+charts/*/requirements.lock
+
+# Sealed Secrets (unencrypted)
+!sealed-secrets/*/
+sealed-secrets/*/unencrypted-*.yaml
+
+# Environment files
 .env
 .env.local
+.env.*.local
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
-logs/
 
 # Temporary files
 *.tmp

@@ -79,7 +79,7 @@ livenessProbe:
 
 readinessProbe:
   httpGet:
-    path: /api/v1/notifications/ready
+    path: /api/v1/notifications/health
     port: 8001
   initialDelaySeconds: 5
   periodSeconds: 10
