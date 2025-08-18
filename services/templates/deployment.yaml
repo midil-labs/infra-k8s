@@ -5,9 +5,7 @@ metadata:
   labels:
     {{- include "onekg-service.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "onekg-service.selectorLabels" . | nindent 6 }}
