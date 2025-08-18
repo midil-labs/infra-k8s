@@ -26,16 +26,14 @@ global:
       - Cache-Control
     allowedOrigins:
       production:
-        - "https://app.onekg.midil.io"
-        - "https://admin.onekg.midil.io"
+        - "https://onekg.midil.io"
       staging:
+        - "https://staging.onekg.midil.io"
         - "https://staging-app.onekg.midil.io"
         - "https://staging-admin.onekg.midil.io"
       development:
-        - "http://localhost:3000"
-        - "https://localhost:3000"
-        - "http://localhost:3001"
-        - "https://localhost:3001"
+        - "http://localhost"
+        - "https://localhost"
 
   # Default resource settings
   resources:
@@ -98,7 +96,7 @@ services:
   notification:
     enabled: true
     namespace: onekg-backend
-    path: /apis/v1/notification
+    path: /v1/notification
     version: "0.1.1-dev0"
     image:
       repository: ghcr.io/midil-labs/onekg-backend-notification

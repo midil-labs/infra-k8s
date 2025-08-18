@@ -60,17 +60,17 @@ The infrastructure follows a modern GitOps approach with:
 
 ### Notification Service
 
-- **Endpoint**: `onekg.midil.io/apis/v1/notification/`
-- **Health Check**: `onekg.midil.io/apis/v1/notification/health`
+- **Endpoint**: `onekg.midil.io/v1/notification/`
+- **Health Check**: `onekg.midil.io/v1/notification/health`
 - **Namespace**: `onekg-backend`
 - **Replicas**: 3 (auto-scaling enabled)
-- **Versioning**: Industry standard URL path versioning (`/v1/`)
+- **Versioning**: API-level versioning (`/v1/`)
 
 ### API Versioning
 
-The platform uses industry standard URL path versioning:
-- **v1**: `onekg.midil.io/apis/v1/notification/`
-- **v2**: `onekg.midil.io/apis/v2/notification/` (future)
+The platform uses API-level versioning for clean, industry-standard URLs:
+- **v1**: `onekg.midil.io/v1/notification/`
+- **v2**: `onekg.midil.io/v2/notification/` (future)
 - **FastAPI**: Handles versioning internally with `/v1/` and `/v2/` prefixes
 
 ## 🔧 Configuration
