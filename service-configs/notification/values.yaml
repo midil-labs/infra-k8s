@@ -16,7 +16,7 @@ healthCheck:
 monitoring:
   enabled: true
   port: "8001"
-  path: "/metrics"
+  path: "/v1/notification/metrics"
 
 resources:
   requests:
