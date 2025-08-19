@@ -3,7 +3,7 @@ global:
   # API Gateway foundation - all services use this base path
   apiGateway:
     basePath: ^/apis(/|$)(.*)
-    stripPrefix: /apis/v1/notification
+    stripPrefix: /apis
   gateway:
     domain: onekg.midil.io
     tls:
