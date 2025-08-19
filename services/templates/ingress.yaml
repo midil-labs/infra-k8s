@@ -20,6 +20,7 @@ spec:
           port: {{ .Values.service.port }}
       middlewares:
         - name: {{ $fullName }}-strip-prefix
+        - name: {{ $fullName }}-path-rewrite
         {{- if .Values.cors.enabled }}
         - name: {{ $fullName }}-cors
         {{- end }}
