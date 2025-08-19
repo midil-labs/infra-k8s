@@ -9,7 +9,7 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /apis
+      - {{ .Values.global.apiGateway.stripPrefix }}
 
 ---
 {{- end }}

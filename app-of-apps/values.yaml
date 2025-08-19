@@ -1,6 +1,9 @@
 # Global configuration for all services
 global:
-  # API Gateway configuration
+  # API Gateway foundation - all services use this base path
+  apiGateway:
+    basePath: ^/apis(/|$)(.*)
+    stripPrefix: /apis
   gateway:
     domain: onekg.midil.io
     tls:
@@ -91,12 +94,13 @@ argocd:
     syncOptions:
       - CreateNamespace=true
 
-# Services to deploy (only notification for now)
+# Services - All use the same API gateway foundation
 services:
+  # Notification Service
   notification:
     enabled: true
     namespace: onekg-backend
-    path: /apis/v1/notification
+    # All API services automatically use global.apiGateway.basePath
     version: "0.1.1.dev2"
     image:
       repository: ghcr.io/midil-labs/onekg-backend-notification

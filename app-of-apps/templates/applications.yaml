@@ -33,13 +33,15 @@ spec:
         - name: "image.tag"
           value: {{ $service.version | quote }}
         
-        # Gateway and ingress
+        # Gateway and API configuration
         - name: "global.gateway.domain"
           value: {{ $.Values.global.gateway.domain | quote }}
         - name: "global.gateway.tls.secretName"
           value: {{ $.Values.global.gateway.tls.secretName | quote }}
-        - name: "ingress.path"
-          value: {{ $service.path | quote }}
+        - name: "global.apiGateway.basePath"
+          value: {{ $.Values.global.apiGateway.basePath | quote }}
+        - name: "global.apiGateway.stripPrefix"
+          value: {{ $.Values.global.apiGateway.stripPrefix | quote }}
         
         # CORS configuration (simplified)
         - name: "cors.enabled"
