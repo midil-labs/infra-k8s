@@ -13,7 +13,7 @@ spec:
     - websecure
     {{- end }}
   routes:
-    - match: Host(`{{ .Values.global.gateway.domain }}`) && PathPrefix(`{{ .Values.ingress.path }}`)
+    - match: Host(`{{ .Values.global.gateway.domain }}`) && PathRegexp(`{{ .Values.global.apiGateway.basePath }}`)
       kind: Rule
       services:
         - name: {{ $fullName }}
