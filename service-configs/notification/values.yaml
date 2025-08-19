@@ -10,7 +10,7 @@ service:
 
 healthCheck:
   enabled: true
-  path: /health
+  path: /v1/notification/health
   port: 8001
 
 monitoring:
