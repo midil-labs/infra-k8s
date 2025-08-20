@@ -101,7 +101,7 @@ services:
     enabled: true
     namespace: onekg-backend
     # All API services automatically use global.apiGateway.basePath
-    version: "0.1.1.dev4"
+    version: "0.1.1.dev5"
     image:
       repository: ghcr.io/midil-labs/onekg-backend-notification
     
