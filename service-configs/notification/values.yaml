@@ -3,6 +3,8 @@
 
 serviceName: notification
 
+
+
 replicaCount: 3
 
 service:
@@ -10,7 +12,7 @@ service:
 
 healthCheck:
   enabled: true
-  path: /v1/notification/health
+  path: /notification/health
   port: 8001
 
 monitoring:
