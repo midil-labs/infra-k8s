@@ -10,13 +10,13 @@ service:
 
 healthCheck:
   enabled: true
-  path: /notification/health
+  path: /health
   port: 8001
 
 monitoring:
   enabled: true
   port: "8001"
-  path: "/notification/metrics"
+  path: "/metrics"
 
 resources:
   requests:
