@@ -1,0 +1,39 @@
+{{- range $serviceName, $service := .Values.services }}
+{{- if $service.enabled }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $serviceName }}
+  namespace: {{ $.Values.argocd.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $serviceName }}
+    app.kubernetes.io/part-of: onekg-platform
+    app.kubernetes.io/managed-by: app-of-apps
+    {{- include "onekg-platform.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: {{ $.Values.argocd.project }}
+  source:
+    repoURL: {{ $.Values.argocd.repoURL }}
+    path: onekg/{{ $serviceName }}
+    targetRevision: {{ $.Values.argocd.targetRevision }}
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ $service.namespace }}
+  
+  syncPolicy:
+    {{- toYaml $.Values.argocd.syncPolicy | nindent 4 }}
+  
+  # Health check for the application
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+{{- end }}
+{{- end }}

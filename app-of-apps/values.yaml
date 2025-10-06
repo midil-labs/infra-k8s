@@ -1,85 +1,7 @@
-# Global configuration for all services
 global:
-  # API Gateway foundation - all services use this base path
-  apiGateway:
-    basePath: ^/apis/v1/([^/]+)(/|$)(.*)
-    stripPrefix: /apis/v1
-  gateway:
-    domain: onekg.midil.io
-    tls:
-      secretName: onekg-api-tls
-      issuer: letsencrypt-prod
-
-  # Global CORS settings
-  cors:
-    environment: production
-    allowCredentials: true
-    maxAge: 86400
-    allowedMethods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - OPTIONS
-    allowedHeaders:
-      - Content-Type
-      - Authorization
-      - X-Requested-With
-      - Accept
-      - Cache-Control
-    allowedOrigins:
-      production:
-        - "https://onekg.midil.io"
-      staging:
-        - "https://staging.onekg.midil.io"
-        - "https://staging-app.onekg.midil.io"
-        - "https://staging-admin.onekg.midil.io"
-      development:
-        - "http://localhost"
-        - "https://localhost"
-
-  # Default resource settings
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "500m"
-      memory: "512Mi"
-
-  # Default autoscaling
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 70
-    targetMemoryUtilizationPercentage: 75
-
-  # Common labels applied to all services
   labels:
     platform: onekg
-    team: backend
-    
-  # Monitoring configuration
-  monitoring:
-    prometheus:
-      enabled: true
-      port: "9090"
-      path: "/metrics"
-
-  # Security defaults
-  security:
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-      fsGroup: 1000
-    containerSecurityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      capabilities:
-        drop:
-          - ALL
+    team: devops
 
 # ArgoCD configuration
 argocd:
@@ -94,32 +16,10 @@ argocd:
     syncOptions:
       - CreateNamespace=true
 
-# Services - All use the same API gateway foundation
+# Services managed by app-of-apps
 services:
-  # Notification Service
-  notification:
+  checkin:
     enabled: true
-    namespace: onekg-backend
-    # All API services automatically use global.apiGateway.basePath
-    version: "0.1.1.dev8"
-    image:
-      repository: ghcr.io/midil-labs/onekg-backend-notification
+    namespace: onekg-checkin
+    syncWave: 2
     
-    # Service-specific overrides
-    replicas: 3
-    resources:
-      requests:
-        cpu: "200m"
-        memory: "256Mi"
-      limits:
-        cpu: "500m"
-        memory: "512Mi"
-    
-    # Monitoring override
-    monitoring:
-      enabled: false
-      port: "8001"
-    
-    # CORS enabled for notification
-    cors:
-      enabled: true
