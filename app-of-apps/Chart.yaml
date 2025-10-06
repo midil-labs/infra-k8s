@@ -13,3 +13,8 @@ home: https://github.com/midil-labs/infra-k8s
 maintainers:
   - name: Midil Labs
     email: devops@midil.io
+
+dependencies:
+  - name: midil
+    version: 1.0.0
+    repository: "https://midil-labs.github.io/helm-charts"
