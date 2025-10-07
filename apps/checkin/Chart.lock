@@ -1,0 +1,6 @@
+dependencies:
+- name: midil
+  repository: https://midil-labs.github.io/helm-charts
+  version: 0.1.0
+digest: sha256:db4abfcdca87feacffe501d3af104ced82425c7038fa965fc406dc30a476d6b1
+generated: "2025-10-06T20:49:30.124289Z"

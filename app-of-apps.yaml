@@ -7,12 +7,14 @@ metadata:
     app.kubernetes.io/name: onekg-platform
     app.kubernetes.io/part-of: onekg-platform
     platform.onekg.io/component: platform
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: onekg-platform
   source:
     repoURL: https://github.com/midil-labs/infra-k8s.git
-    path: app-of-apps
     targetRevision: HEAD
+    path: app-of-apps
     helm:
       valueFiles:
         - values.yaml
@@ -25,9 +27,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  # Sync wave to ensure this deploys first
-  info:
-    - name: Description
-      value: "OneKG Microservices Platform - App of Apps Pattern"
-    - name: Services
-      value: "notification (enabled)"
