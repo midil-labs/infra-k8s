@@ -1,20 +1,18 @@
 apiVersion: v2
-name: onekg-platform
-description: OneKG Microservices Platform - App of Apps
+name: checkin-service
+description: Checkin Service
 type: application
-version: 1.0.0
+version: 0.1.0
 appVersion: "1.0"
 keywords:
+  - checkin
   - onekg
-  - microservices
-  - platform
-  - app-of-apps
+  - microservice
 home: https://github.com/midil-labs/infra-k8s
 maintainers:
   - name: Midil Labs
     email: devops@midil.io
-
 dependencies:
   - name: midil
-    version: 1.0.0
+    version: 0.1.0
     repository: "https://midil-labs.github.io/helm-charts"
