@@ -22,7 +22,7 @@ data:
   MIDIL__API__NOTIFICATION__BASE_URL: "https://2ac083dec1f5.ngrok-free.app"
   MIDIL__API__ROOT_PATH: "/apis/v1/checkin"
   
-  MIDIL__SERVER__PORT: 8080
-  MIDIL__SERVER__PORT: 8080
+  MIDIL__SERVER__PORT: "8080"
+  MIDIL__SERVER__PORT: "8080"
   MIDIL__SERVER__HOST: "0.0.0.0"
 
