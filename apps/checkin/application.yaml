@@ -4,7 +4,7 @@ metadata:
   name: checkin
   namespace: argocd
 spec:
-  project: default
+  project: onekg-platform
   source:
     repoURL: https://github.com/midil-labs/infra-k8s.git
     targetRevision: apply-midil-charts
