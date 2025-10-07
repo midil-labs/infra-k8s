@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/midil-labs/infra-k8s.git
     targetRevision: main
-    path: apps/checkin
+    path: .
     helm:
       valueFiles:
         - values.yaml
