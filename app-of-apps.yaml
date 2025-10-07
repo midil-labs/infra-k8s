@@ -14,10 +14,10 @@ spec:
   source:
     repoURL: https://github.com/midil-labs/infra-k8s.git
     targetRevision: apply-midil-charts
-    path: app-of-apps
-    helm:
-      valueFiles:
-        - values.yaml
+    path: apps
+    directory:
+      recurse: true
+      include: application.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
