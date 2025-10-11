@@ -1,0 +1,45 @@
+midil:
+  serviceName: checkin
+  platform: onekg
+
+  image:
+    registry: ghcr.io/midil-labs
+    service: onekg-checkin-api
+    tag: 0.1.0-dev4@sha256:5999c0b4462ace8aa101bf4160ed5b13b799ede12f87586bb0fe565ce0077bc5
+    pullSecrets:
+      - name: ghcr-secret
+    createPullSecret: false
+    pullSecretName: ghcr-secret
+
+  ingressRoute:
+    enabled: true
+    host: "local.midil.io"
+    entryPoints: ["websecure"]
+    route:
+      pathPrefix: "/apis/v1/checkin"
+      servicePort: 80
+    tls:
+      enabled: false
+      certResolver: ""
+
+
+  cors:
+    enabled: false
+
+  service:
+    http:
+      targetPort: 8080
+
+  probes:
+    enabled: false
+    liveness:
+      port: 8080
+      path: /docs
+    readiness:
+      port: 8080
+      path: /docs
+    startup:
+      port: 8080
+
+  autoscaling:
+    enabled: false

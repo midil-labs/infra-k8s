@@ -1,74 +1,94 @@
-# Makefile for OneKG Infrastructure
-# Provides convenient commands for managing the GitOps infrastructure
+# --- GLOBAL CONFIG ---
+CLUSTER_CONTEXT ?= k3s-default
+ARGOCD_NAMESPACE = argocd
+APP ?= all
+APPS := $(sort $(notdir $(patsubst %/,%,$(dir $(wildcard apps/*/application.yaml)))))
 
-.PHONY: help lint validate deploy clean status logs
+# Determine which apps to operate on
+ifeq ($(APP),all)
+APPS_SELECTED := $(APPS)
+else
+ifeq ($(filter $(APP),$(APPS)),$(APP))
+APPS_SELECTED := $(APP)
+else
+$(error APP '$(APP)' not found. Valid options: $(APPS))
+endif
+endif
 
-# Default target
-help:
-	@echo "OneKG Infrastructure Management"
-	@echo "=============================="
-	@echo ""
-	@echo "Available commands:"
-	@echo "  lint      - Lint all YAML files"
-	@echo "  validate  - Validate naming conventions"
-	@echo "  deploy    - Deploy infrastructure"
-	@echo "  clean     - Clean up deployments"
-	@echo "  status    - Check deployment status"
-	@echo "  logs      - View application logs"
-	@echo "  help      - Show this help message"
+REGISTRY_SERVER = ghcr.io
+REGISTRY_USERNAME ?= $(shell echo $$GHCR_USER)
+REGISTRY_PASSWORD ?= $(shell echo $$GHCR_PAT)
 
-# Lint all YAML files
-lint:
-	@echo "🔍 Linting YAML files..."
-	@for file in $$(find argocd-apps -name "*.yaml" -o -name "*.yml"); do \
-		echo "Linting $$file..."; \
-		yamllint "$$file" || exit 1; \
+GREEN := \033[0;32m
+NC := \033[0m
+
+# --- MAIN TARGET ---
+.PHONY: all
+all: check-prereqs setup-argocd-ns install-argocd create-namespaces create-ghcr-secrets update-helm-deps bootstrap
+	@echo "$(GREEN)✅ Environment setup complete.$(NC)"
+
+check-prereqs:
+	@command -v kubectl >/dev/null 2>&1 || { echo "❌ kubectl not found"; exit 1; }
+	@command -v helm >/dev/null 2>&1 || { echo "❌ helm not found"; exit 1; }
+	@if [ -z "$(REGISTRY_USERNAME)" ] || [ -z "$(REGISTRY_PASSWORD)" ]; then \
+	  echo "❌ GHCR_USER or GHCR_PAT not set in environment"; exit 1; \
+	fi
+
+setup-argocd-ns:
+	kubectl create namespace $(ARGOCD_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+
+install-argocd:
+	@echo "$(GREEN)> Installing Argo CD via Helm$(NC)"
+	helm repo add argo https://argoproj.github.io/argo-helm
+	helm upgrade --install argocd argo/argo-cd \
+	  --namespace $(ARGOCD_NAMESPACE) \
+	  --create-namespace \
+	  --set server.service.type=ClusterIP
+	kubectl wait --for=condition=available --timeout=180s deployment/argocd-server -n $(ARGOCD_NAMESPACE)
+
+create-namespaces:
+	@for ns in $(APPS_SELECTED); do \
+	  echo "$(GREEN)> Creating namespace onekg-$$ns$(NC)"; \
+	  kubectl create namespace onekg-$$ns --dry-run=client -o yaml | kubectl apply -f -; \
 	done
-	@echo "✅ All YAML files passed linting"
 
-# Validate naming conventions
-validate:
-	@echo "🔍 Validating naming conventions..."
-	@./scripts/validate-naming.sh
+create-ghcr-secrets:
+	@for ns in $(APPS_SELECTED); do \
+	  echo "$(GREEN)> Creating GHCR secret in onekg-$$ns$(NC)"; \
+	  kubectl create secret docker-registry ghcr-secret \
+	    --namespace onekg-$$ns \
+	    --docker-server=$(REGISTRY_SERVER) \
+	    --docker-username=$(REGISTRY_USERNAME) \
+	    --docker-password=$(REGISTRY_PASSWORD) \
+	    --dry-run=client -o yaml | kubectl apply -f -; \
+	  kubectl patch serviceaccount default -n onekg-$$ns \
+	    -p '{"imagePullSecrets": [{"name": "ghcr-secret"}]}' || true; \
+	done
 
-# Deploy infrastructure
-deploy:
-	@echo "🚀 Deploying OneKG infrastructure..."
-	@echo "1. Deploying infrastructure components..."
-	kubectl apply -f argocd-apps/argocd/infrastructure/
-	@echo "2. Deploying platform..."
-	kubectl apply -f argocd-apps/argocd/onekg-platform-app.yaml
-	@echo "✅ Deployment initiated"
-	@echo "📊 Check status with: make status"
+update-helm-deps:
+	@for app in $(APPS_SELECTED); do \
+	  echo "$(GREEN)> Updating Helm deps for $$app$(NC)"; \
+	  cd apps/$$app && helm dependency update; \
+	done
 
-# Clean up deployments
-clean:
-	@echo "🧹 Cleaning up deployments..."
-	kubectl delete -f argocd-apps/argocd/ --ignore-not-found=true
-	@echo "✅ Cleanup completed"
+bootstrap:
+	@if [ "$(APP)" = "all" ]; then \
+	  kubectl apply -f app-of-apps.yaml -n $(ARGOCD_NAMESPACE); \
+	else \
+	  kubectl apply -f apps/project.yaml -n $(ARGOCD_NAMESPACE); \
+	  kubectl apply -f apps/$(APP)/application.yaml -n $(ARGOCD_NAMESPACE); \
+	fi
 
-# Check deployment status
 status:
-	@echo "📊 Checking deployment status..."
-	@echo "ArgoCD Applications:"
-	argocd app list
-	@echo ""
-	@echo "Platform Status:"
-	argocd app get onekg-platform
+	@kubectl get applications -n $(ARGOCD_NAMESPACE)
+	@for ns in $(APPS_SELECTED); do \
+	  echo "$(GREEN)> Pods in onekg-$$ns$(NC)"; \
+	  kubectl get pods -n onekg-$$ns; \
+	done
 
-# View application logs
-logs:
-	@echo "📋 Viewing application logs..."
-	@echo "Available applications:"
-	@echo "  - onekg-platform"
-	@echo "  - onekg-namespaces"
-	@echo "  - onekg-sealed-secrets"
-	@echo "  - onekg-secrets"
-	@echo ""
-	@echo "Usage: argocd app logs <app-name>"
-
-# Quick validation
-quick-validate:
-	@echo "🔍 Quick validation..."
-	yamllint argocd-apps/ sealed-secrets/; \
-	@echo "✅ Quick validation completed"
+clean:
+	@echo "$(GREEN)> Cleaning up$(NC)"
+	@for ns in $(APPS); do \
+	  kubectl delete namespace onekg-$$ns || true; \
+	done
+	kubectl delete namespace $(ARGOCD_NAMESPACE) || true
