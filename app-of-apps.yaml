@@ -13,7 +13,7 @@ spec:
   project: onekg-platform
   source:
     repoURL: https://github.com/midil-labs/infra-k8s.git
-    targetRevision: apply-midil-charts
+    targetRevision: HEAD
     path: apps
     directory:
       recurse: true
