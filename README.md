@@ -1,8 +1,7 @@
 
-````markdown
 # infra-k8s
 
-Kubernetes manifests and Helm apps for the **OneKG Platform**, managed by **Argo CD** using the **App-of-Apps pattern**.
+Kubernetes manifests and Helm apps for the **OneKG Platform**, managed by **Argo CD** using the _App-of-Apps_ pattern.
 
 This repository currently deploys the `checkin` service using the shared **Midil** Helm chart, with configuration, secrets (via **SealedSecrets**), and optional container registry authentication for GHCR.
 
@@ -15,6 +14,7 @@ Each service (e.g., `checkin`) is managed as a Helm application tracked by Argo 
 Argo CD continuously syncs this repository’s manifests into the cluster, ensuring declarative, version-controlled infrastructure.
 
 The **Midil chart** serves as a shared base chart for all OneKG services — providing common templates for:
+
 - Deployments
 - Services
 - IngressRoute (Traefik)
@@ -25,15 +25,16 @@ The **Midil chart** serves as a shared base chart for all OneKG services — pro
 
 ## Contents
 
-| Path | Description |
-|------|--------------|
-| `apps/project.yaml` | Argo CD AppProject definition for platform apps |
-| `app-of-apps.yaml` | Root Argo CD Application (discovers apps in `apps/`) |
-| `apps/checkin/` | Argo CD Application (Helm) for `checkin` |
-| `apps/checkin/templates/*.secret.yaml` | SealedSecrets for app secrets and registry auth |
-| `k3s-registries.yaml` | Optional containerd registry auth for k3s nodes |
+| Path                              | Description                                      |
+|------------------------------------|--------------------------------------------------|
+| `apps/project.yaml`                | Argo CD AppProject definition for platform apps  |
+| `app-of-apps.yaml`                 | Root Argo CD Application (discovers apps in `apps/`) |
+| `apps/checkin/`                    | Argo CD Application (Helm) for `checkin`         |
+| `apps/checkin/templates/*.secret.yaml` | SealedSecrets for app secrets and registry auth  |
+| `k3s-registries.yaml`              | Optional containerd registry auth for k3s nodes   |
 
 ### Repository Layout
+
 ```text
 apps/
   project.yaml                   # Argo CD AppProject for platform apps
@@ -47,37 +48,40 @@ apps/
       checkin.secret.yaml        # SealedSecret with app secrets
 app-of-apps.yaml                 # Root Argo CD Application to discover apps/
 k3s-registries.yaml              # Optional containerd registry auth (k3s)
-````
+```
 
 ---
-### Dependencies
+
+## Dependencies
 
 #### 🧠 What is midil?
 
-midil is a shared Helm chart that provides common deployment templates for all OneKG microservices, including:
-Standardized Deployment and Service specs
-Consistent Ingress configuration
-Environment variable templates
-Built-in observability and health probes
-Each microservice (e.g., checkin, notifications, etc.) imports midil as a subchart to maintain uniformity across environments.
+**Midil** is a shared Helm chart that provides common deployment templates for all OneKG microservices, including:
 
-----
+- Standardized Deployment and Service specs
+- Consistent Ingress configuration
+- Environment variable templates
+- Built-in observability and health probes
+
+Each microservice (e.g., `checkin`, `notifications`, etc.) imports midil as a subchart to maintain uniformity across environments.
+
+---
 
 ## Prerequisites
 
-Before deploying:
+Before deploying, ensure you have:
 
-* `kubectl` v1.28+
-* `helm` v3+
-* A running Kubernetes cluster (k3s, k3d, kind, or managed)
-* **Argo CD** installed (`argocd` namespace)
-* **Bitnami Sealed Secrets** controller installed (`sealed-secrets` namespace)
-* Access to pull images from `ghcr.io/midil-labs`
+- `kubectl` v1.28+
+- `helm` v3+
+- A running Kubernetes cluster (k3s, k3d, kind, or managed)
+- **Argo CD** installed (`argocd` namespace)
+- **Bitnami Sealed Secrets** controller installed (`sealed-secrets` namespace)
+- Access to pull images from `ghcr.io/midil-labs`
 
 > **Note:**
 >
-> * k3s ships with Traefik, which the Midil chart can use via Traefik `IngressRoute`.
-> * If using a different ingress controller, update `apps/checkin/values.yaml` accordingly.
+> - k3s ships with Traefik, which the Midil chart can use via Traefik `IngressRoute`.
+> - If using a different ingress controller, update `apps/checkin/values.yaml` accordingly.
 
 ---
 
@@ -116,7 +120,7 @@ kubectl get pods -n sealed-secrets
 
 ### 3. Bootstrap Argo CD with this repository
 
-Ensure the `targetRevision` in `app-of-apps.yaml` points to the branch you want Argo CD to track (e.g. `my-branch`):
+Ensure the `targetRevision` in `app-of-apps.yaml` points to the branch you want Argo CD to track (e.g., `my-branch`):
 
 ```bash
 kubectl apply -f apps/project.yaml
@@ -131,14 +135,14 @@ Argo CD will automatically discover and create the `checkin` application from `a
 
 This repo includes **SealedSecrets** for:
 
-* **GHCR pull secret:** `apps/checkin/templates/ghcr.secret.yaml` (name: `ghcr-secret`)
-* **App secrets:** `apps/checkin/templates/checkin.secret.yaml` (name: `checkin-secrets`)
+- **GHCR pull secret:** `apps/checkin/templates/ghcr.secret.yaml` (name: `ghcr-secret`)
+- **App secrets:** `apps/checkin/templates/checkin.secret.yaml` (name: `checkin-secrets`)
 
 These are applied automatically when the Helm chart is synced.
 
 ### Regenerate GHCR Pull Secret
 
-Requirements: `kubeseal` CLI and Sealed Secrets controller running.
+**Requirements:** `kubeseal` CLI and Sealed Secrets controller running.
 
 ```bash
 export GITHUB_USERNAME=your-gh-username
@@ -178,7 +182,7 @@ kubeseal \
   > apps/checkin/templates/checkin.secret.yaml
 ```
 
-> ⚠️ **Important:**
+> ⚠️ **Important:**  
 > Never commit raw secrets — only the sealed versions generated above.
 
 ---
@@ -188,7 +192,7 @@ kubeseal \
 Key configuration values are defined in `apps/checkin/values.yaml`:
 
 | Key                             | Description                                 |
-| ------------------------------- | ------------------------------------------- |
+|---------------------------------|---------------------------------------------|
 | `midil.image.*`                 | Image registry, name, and tag/digest        |
 | `midil.ingressRoute.*`          | Traefik host, entry points, and path prefix |
 | `midil.service.http.targetPort` | Container port                              |
@@ -200,26 +204,26 @@ Argo CD will automatically reconcile updates when you modify values (if auto-syn
 
 ## Verifying Deployment
 
-#### Check Argo CD apps
+**Check Argo CD apps:**
 
 ```bash
 kubectl -n argocd get applications
 ```
 
-#### Check workload
+**Check workload:**
 
 ```bash
 kubectl -n onekg-checkin get pods,svc
 ```
 
-#### Port-forward to test locally
+**Port-forward to test locally:**
 
 ```bash
 kubectl -n onekg-checkin port-forward svc/checkin-service 8080:80
 curl -i http://localhost:8080/apis/v1/checkin/docs
 ```
 
-#### Test via Traefik ingress
+**Test via Traefik ingress:**
 
 ```bash
 sudo sh -c 'echo "127.0.0.1 local.midil.io" >> /etc/hosts'
@@ -240,7 +244,7 @@ To add a new app (e.g., `myapp`):
 mkdir -p apps/myapp/templates
 ```
 
-`apps/myapp/application.yaml`:
+Create `apps/myapp/application.yaml`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -270,7 +274,7 @@ spec:
 
 ### 2. Add a Helm chart depending on Midil
 
-`apps/myapp/Chart.yaml`:
+Create `apps/myapp/Chart.yaml`:
 
 ```yaml
 apiVersion: v2
@@ -285,7 +289,7 @@ dependencies:
     repository: "https://midil-labs.github.io/helm-charts"
 ```
 
-`apps/myapp/values.yaml`:
+Create `apps/myapp/values.yaml`:
 
 ```yaml
 midil:
@@ -314,9 +318,9 @@ midil:
 
 ### 3. Add optional config and secrets
 
-* Optional ConfigMap: `apps/myapp/templates/config.yaml`
-* Reuse the global pull secret `ghcr-secret` or generate one per namespace.
-* Create and seal app secrets as needed using `kubeseal`.
+- Optional ConfigMap: `apps/myapp/templates/config.yaml`
+- Reuse the global pull secret `ghcr-secret` or generate one per namespace.
+- Create and seal app secrets as needed using `kubeseal`.
 
 ### 4. Update AppProject destinations
 
@@ -338,7 +342,7 @@ Once merged, the App-of-Apps will detect your new app and sync it automatically.
 ## Conventions
 
 | Concept                 | Format           |
-| ----------------------- | ---------------- |
+|-------------------------|------------------|
 | **Namespace**           | `onekg-<app>`    |
 | **Application name**    | `<app>`          |
 | **Chart name**          | `<app>-service`  |
@@ -354,9 +358,9 @@ Once merged, the App-of-Apps will detect your new app and sync it automatically.
 
 ### Using Argo CD (recommended)
 
-* Work on a feature branch.
-* Set `targetRevision` in `app-of-apps.yaml` to that branch.
-* Push and let Argo CD deploy automatically.
+- Work on a feature branch.
+- Set `targetRevision` in `app-of-apps.yaml` to that branch.
+- Push and let Argo CD deploy automatically.
 
 ### Using Helm directly (for quick testing)
 
@@ -398,12 +402,12 @@ midil.image.pullSecrets: []
 
 ## Troubleshooting
 
-| Issue                            | Likely Cause                                  | Fix                                                             |
-| -------------------------------- | --------------------------------------------- | --------------------------------------------------------------- |
-| **Image pull failures**          | Missing or invalid GHCR credentials           | Ensure `ghcr-secret` exists in namespace or use containerd auth |
-| **SealedSecrets not decrypting** | Name/namespace mismatch or missing controller | Verify controller is running and flags match                    |
-| **Ingress 404 / SSL issues**     | Misconfigured Traefik or hosts entry          | Check Traefik CRDs, entry points, and `/etc/hosts`              |
-| **Argo app out of sync**         | Manual drift or sync error                    | Run `kubectl -n argocd describe application <app>`              |
+| Issue                             | Likely Cause                                  | Fix                                                             |
+|------------------------------------|-----------------------------------------------|-----------------------------------------------------------------|
+| **Image pull failures**           | Missing or invalid GHCR credentials           | Ensure `ghcr-secret` exists in namespace or use containerd auth |
+| **SealedSecrets not decrypting**  | Name/namespace mismatch or missing controller | Verify controller is running and flags match                    |
+| **Ingress 404 / SSL issues**      | Misconfigured Traefik or hosts entry          | Check Traefik CRDs, entry points, and `/etc/hosts`              |
+| **Argo app out of sync**          | Manual drift or sync error                    | Run `kubectl -n argocd describe application <app>`              |
 
 ---
 
@@ -419,23 +423,24 @@ To deploy a new image:
 
 ## References
 
-* [Argo CD App-of-Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-of-apps/)
-* [Bitnami Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
-* [Helm Dependency Management](https://helm.sh/docs/topics/charts/#chart-dependencies)
+- [Argo CD App-of-Apps Pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/app-of-apps/)
+- [Bitnami Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
+- [Helm Dependency Management](https://helm.sh/docs/topics/charts/#chart-dependencies)
 
 ---
 
 ## Contributing
 
-* Make changes in a feature branch.
-* Validate manifests locally:
+- Make changes in a feature branch.
+- Validate manifests locally:
 
   ```bash
   helm lint apps/checkin
   kubectl apply --dry-run=client -f apps/checkin/application.yaml
   ```
-* Ensure all new apps follow conventions and naming standards.
-* Submit a PR; Argo CD will reconcile after merge.
+
+- Ensure all new apps follow conventions and naming standards.
+- Submit a PR; Argo CD will reconcile after merge.
 
 ---
 
@@ -454,7 +459,5 @@ Argo CD
 
 ---
 
-**Maintained by:** [Midil Labs](https://github.com/midil-labs)
+**Maintained by:** [Midil Labs](https://github.com/midil-labs)  
 **Purpose:** Declarative infrastructure for OneKG platform services under Argo CD management.
-
-```
