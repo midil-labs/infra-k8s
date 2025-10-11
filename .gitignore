@@ -1,36 +1,12 @@
-# Kubernetes
-*.kubeconfig
-*.pem
-*.key
-*.crt
-*.p12
+# macOS
+.DS_Store
 
-# Helm
-charts/*/charts/
-charts/*/requirements.lock
-
-# Sealed Secrets (unencrypted)
-!sealed-secrets/*/
-sealed-secrets/*/unencrypted-*.yaml
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# IDE
-.vscode/
+# Editors
 .idea/
+.vscode/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
+# Helm packaged charts (keep vendored charts under apps/*/charts)
+*.tgz
+!apps/**/charts/*.tgz
