@@ -13,7 +13,7 @@ midil:
 
   ingressRoute:
     enabled: true
-    host: "local.midil.io"
+    host: "onekg.midil.io"
     entryPoints: ["websecure"]
     route:
       pathPrefix: "/apis/v1/checkin"
