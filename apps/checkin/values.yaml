@@ -19,7 +19,7 @@ midil:
       pathPrefix: "/apis/v1/checkin"
       servicePort: 80
     tls:
-      enabled: false
+      enabled: true
       certResolver: ""
 
 
