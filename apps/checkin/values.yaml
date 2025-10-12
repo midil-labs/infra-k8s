@@ -1,6 +1,7 @@
 midil:
   serviceName: checkin
   platform: onekg
+  replicaCount: 3
 
   image:
     registry: ghcr.io/midil-labs
