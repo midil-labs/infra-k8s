@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-config
+  namespace: {{ .Release.Namespace }}
+data:
+  MIDIL__AUTH__TYPE: "cognito"
+  MIDIL__AUTH__USER_POOL_ID: "us-east-1_dnBcODUyQ"
+  MIDIL__AUTH__CLIENT_ID: "2j97fbdu588je17scvnlm9t4bk"
+  MIDIL__AUTH__REGION: "us-east-1"
+
+  MIDIL__API__DATABASE__NAME: "user-db"
+  MIDIL__API__DATABASE__COLLECTION: "user"
+  MIDIL__API__DATABASE__URI: "mongodb://localhost:27017"
+  MIDIL__API__ROOT_PATH: "/apis/v1/users"
+
+  MIDIL__API__SERVER__PORT: "8000"
+  MIDIL__API__SERVER__HOST: "0.0.0.0"
+

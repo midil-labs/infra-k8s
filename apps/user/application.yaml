@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: user
+  namespace: argocd
+spec:
+  project: onekg-platform
+  source:
+    repoURL: https://github.com/midil-labs/infra-k8s.git
+    targetRevision: HEAD
+    path: apps/user
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: onekg-user
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
