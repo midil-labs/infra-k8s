@@ -1,6 +1,7 @@
 midil:
   serviceName: notification
   platform: onekg
+  replicaCount: 3
 
   image:
     registry: ghcr.io/midil-labs
