@@ -19,8 +19,8 @@ midil:
       pathPrefix: "/apis/v1/notification"
       servicePort: 80
     tls:
-      enabled: false
-      certResolver: ""
+      enabled: true
+      secretName: "onekg-midil-io-tls"
 
 
   cors:
@@ -28,18 +28,18 @@ midil:
 
   service:
     http:
-      targetPort: 8080
+      targetPort: 7000
 
   probes:
     enabled: false
     liveness:
-      port: 8080
+      port: 7000
       path: /docs
     readiness:
-      port: 8080
+      port: 7000
       path: /docs
     startup:
-      port: 8080
+      port: 7000
 
   autoscaling:
     enabled: false
