@@ -5,7 +5,7 @@ midil:
   image:
     registry: ghcr.io/midil-labs
     service: onekg-user-api
-    tag: 0.1.0-dev4@sha256:5999c0b4462ace8aa101bf4160ed5b13b799ede12f87586bb0fe565ce0077bc5
+    tag: 0.1.0-dev1@sha256:ff6939af24b36914411b6c9f4f5b00f42c81cd019d76d29140f88daa4bdc8fdb
     pullSecrets:
       - name: ghcr-secret
     createPullSecret: false
