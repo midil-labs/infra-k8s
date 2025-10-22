@@ -1,0 +1,13 @@
+# Exclude non-chart artifacts when packaging this chart
+
+# VCS
+.git/
+
+# OS
+.DS_Store
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.swp
+*.swo

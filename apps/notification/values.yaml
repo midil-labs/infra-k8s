@@ -1,11 +1,10 @@
 midil:
-  serviceName: checkin
+  serviceName: notification
   platform: onekg
-  replicaCount: 3
 
   image:
     registry: ghcr.io/midil-labs
-    service: onekg-checkin-api
+    service: onekg-notification-api
     tag: 0.1.0-dev4@sha256:5999c0b4462ace8aa101bf4160ed5b13b799ede12f87586bb0fe565ce0077bc5
     pullSecrets:
       - name: ghcr-secret
@@ -17,11 +16,11 @@ midil:
     host: "onekg.midil.io"
     entryPoints: ["websecure"]
     route:
-      pathPrefix: "/apis/v1/checkin"
+      pathPrefix: "/apis/v1/notification"
       servicePort: 80
     tls:
-      enabled: true
-      secretName: "onekg-midil-io-tls"
+      enabled: false
+      certResolver: ""
 
 
   cors:
@@ -29,18 +28,18 @@ midil:
 
   service:
     http:
-      targetPort: 7000
+      targetPort: 8080
 
   probes:
     enabled: false
     liveness:
-      port: 7000
+      port: 8080
       path: /docs
     readiness:
-      port: 7000
+      port: 8080
       path: /docs
     startup:
-      port: 7000
+      port: 8080
 
   autoscaling:
     enabled: false
