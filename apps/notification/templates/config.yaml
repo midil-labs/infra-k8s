@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   MIDIL__API__ROOT_PATH: "/apis/v1/notification"
-  MIDIL__API__SERVER__PORT: "8000"
+  MIDIL__API__SERVER__PORT: "7000"
   MIDIL__API__SERVER__HOST: "0.0.0.0"
   MIDIL__API__NOTIFICATION__SMS: "mtn"
   NOTIFICATION__SMS__ENABLED_PROVIDERS: "mtn"
