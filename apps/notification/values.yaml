@@ -6,7 +6,7 @@ midil:
   image:
     registry: ghcr.io/midil-labs
     service: onekg-notification-api
-    tag: 0.1.0.dev1@sha256:293e6a03ddbfc923492cf89e157fc9143384d2fc196d51218f0e03e89bd69945
+    tag: 0.1.0.dev2@sha256:83eb055e7b7e93949ede5fa953830f67c18f43b7f1ef049ad13609dc83063f0a
     pullSecrets:
       - name: ghcr-secret
     createPullSecret: false
