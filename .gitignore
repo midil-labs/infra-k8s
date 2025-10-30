@@ -10,3 +10,6 @@
 # Helm packaged charts (keep vendored charts under apps/*/charts)
 *.tgz
 !apps/**/charts/*.tgz
+
+# Local secrets script should never be committed
+secrets.sh
